@@ -1,5 +1,5 @@
 /*
-  Este código visa controlar LEDs por meio de uma chave.
+  Este cÃ³digo visa controlar LEDs por meio de uma chave.
 */
 
 #include "main.h"
@@ -8,7 +8,7 @@ int num = 0;
 int estado_atual = 0;
 
 void teste(void) {
-	for(int i=0; i!=160000; i++);
+	for(int i=0; i!=16000; i++);
 	if ((estado_atual == 0) && ((GPIOB->IDR & 0x00000100) != 0x0)) {
 		estado_atual = 1;
 		if (num == 8) {
@@ -26,9 +26,9 @@ void teste(void) {
 int main(void)
 {
   RCC->AHB1ENR=0x00000087;  // inicializa o clock;
-  GPIOA->MODER=0x28000000;  // configura a função de Debugger com o ARM;
-  GPIOB->MODER=0x55000454;  // configura os pinos B1, B2, B3, B5, B12, B13, B14 e B15 com a função de saída;
-  // O pino B8 será usado como a chave do circuito, sendo utilizada a sua função de leitura de valores.
+  GPIOA->MODER=0x28000000;  // configura a funÃ§Ã£o de Debugger com o ARM;
+  GPIOB->MODER=0x55000454;  // configura os pinos B1, B2, B3, B5, B12, B13, B14 e B15 com a funÃ§Ã£o de saÃ­da;
+  // O pino B8 serÃ¡ usado como a chave do circuito, sendo utilizada a sua funÃ§Ã£o de leitura de valores.
   // ((GPIOB->IDR)&0x00000100) ---> testa o pino B8
 
   while (1)
