@@ -1,6 +1,6 @@
 /*
-Este cÛdigo visa controlar um display catodo de sete segmentos.
-Ele ir· operar como um contador de 0 atÈ 9.
+Este c√≥digo visa controlar um display catodo de sete segmentos.
+Ele ir√° operar como um contador de 0 at√© 9.
 */
 
 #include "main.h"
@@ -63,8 +63,8 @@ void numero_9(void) {
 int main(void)
 {
 	RCC->AHB1ENR=0x00000087;  // inicializa o clock;
-    GPIOA->MODER=0x28000000;  // inicializa o modo debugger para a interface do ARM;
-	GPIOB->MODER=0x15000454;  // configura os pinos B1, B2, B3, B5, B12, B13, B14 com a funÁ„o de saÌda;
+    	GPIOA->MODER=0x28000000;  // inicializa o modo debugger para a interface do ARM;
+	GPIOB->MODER=0x15000454;  // configura os pinos B1, B2, B3, B5, B12, B13, B14 com a fun√ß√£o de sa√≠da;
 	// pino a - pino B1;	pino b - pino B2;	pino c - pino B3; pino d - pino B5;
 	// pino e - pino B12; pino f - pino B13;	pino g - pino B14
 
