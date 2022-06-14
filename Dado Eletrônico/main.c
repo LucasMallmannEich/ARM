@@ -60,12 +60,12 @@ void teste(void) {
 int main(void)
 {
 	RCC->AHB1ENR=0x00000087;  // inicializa o clock;
-    GPIOA->MODER=0x28000000;  // inicializa o modo debugger para a interface do ARM;
-    GPIOB->MODER=0x15000454;  // configura os pinos B1, B2, B3, B5, B12, B13, B14 com a funÁ„o de saÌda;
+   	GPIOA->MODER=0x28000000;  // inicializa o modo debugger para a interface do ARM;
+    	GPIOB->MODER=0x15000454;  // configura os pinos B1, B2, B3, B5, B12, B13, B14 com a fun√ß√£o de sa√≠da;
 	// SUPERIOR: esquerda - PB1; centro - PB2; direita - PB3.
 	// MEIO: centro - PB5.
 	// INFERIOR: esquerda - PB12; centro - PB13; direita - PB14.
-	// Pino PB15 - bot„o.
+	// Pino PB15 - bot√£o.
 
 	srand(time(NULL));
 
