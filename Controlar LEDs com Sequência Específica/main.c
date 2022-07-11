@@ -1,10 +1,10 @@
 /*
-  Este código visa controlar LEDs por meio de três chaves.
-  1. Configurar três chaves como entrada. Estas chaves irão gerar um número binário (0-7);
-  2. Configurar sete saídas do ARM e a estas conectar sete Leds;
-  3. Ao pressionar um botão, ligar os Leds em sequência até que o número de Leds acesos seja igual ao número binário das chaves;
-  4. Quando o número de Leds acesos for igual ao número binário das chaves, os 7 Leds devem piscar com frequência de 1Hz.
-  Obs: O intervalo de acionamento dos Leds deverá ser de aproximadamente 1s.
+  Este cÃ³digo visa controlar LEDs por meio de trÃªs chaves.
+  1. Configurar trÃªs chaves como entrada. Estas chaves irÃ£o gerar um nÃºmero binÃ¡rio (0-7);
+  2. Configurar sete saÃ­das do ARM e a estas conectar sete Leds;
+  3. Ao pressionar um botÃ£o, ligar os Leds em sequÃªncia atÃ© que o nÃºmero de Leds acesos seja igual ao nÃºmero binÃ¡rio das chaves;
+  4. Quando o nÃºmero de Leds acesos for igual ao nÃºmero binÃ¡rio das chaves, os 7 Leds devem piscar com frequÃªncia de 1Hz.
+  Obs: O intervalo de acionamento dos Leds deverÃ¡ ser de aproximadamente 1s.
 */
 
 #include "main.h"
@@ -93,18 +93,18 @@ void liga_7(void) {
 int main(void)
 {
   RCC->AHB1ENR=0x00000087;  // inicializa o clock;
-  GPIOA->MODER=0x28000000;  // configura a função de Debugger com o ARM;
-  GPIOB->MODER=0x55000054;  // configura os pinos B1, B2, B3, B12, B13, B14 e B15 com a função de saída;
-  // Os pinos B6, B8 e B9 serão usados como as chaves do circuito, sendo utilizada a sua função de leitura de valores.
-  // O pino B6 é a chave 0, o pino B8 é a chave 1 e o pino B9 é a chave 2.
+  GPIOA->MODER=0x28000000;  // configura a funÃ§Ã£o de Debugger com o ARM;
+  GPIOB->MODER=0x55000054;  // configura os pinos B1, B2, B3, B12, B13, B14 e B15 com a funÃ§Ã£o de saÃ­da;
+  // Os pinos B6, B8 e B9 serÃ£o usados como as chaves do circuito, sendo utilizada a sua funÃ§Ã£o de leitura de valores.
+  // O pino B6 Ã© a chave 0, o pino B8 Ã© a chave 1 e o pino B9 Ã© a chave 2.
   // ((GPIOB->IDR)&0x00000040) ---> testa o pino B6
   // ((GPIOB->IDR)&0x00000100) ---> testa o pino B8
   // ((GPIOB->IDR)&0x00000200) ---> testa o pino B9
-  // O pino B10 vai ser usado como um botão que irá fazer os LEDs ligarem em sequência.
+  // O pino B10 vai ser usado como um botÃ£o que irÃ¡ fazer os LEDs ligarem em sequÃªncia.
 
   
   while(((GPIOB->IDR)&0x00000400) == 0x00000000) {
-	  // Enquanto o botão não for presisonado, nada acontecerá.
+	  // Enquanto o botÃ£o nÃ£o for presisonado, nada acontecerÃ¡.
   }
 
   if (((GPIOB->IDR)&0x00000040) == 0x0 && ((GPIOB->IDR)&0x00000100) == 0x0 && ((GPIOB->IDR)&0x00000200) == 0x0) {
@@ -134,7 +134,7 @@ int main(void)
 
   while (1)
   {
-	 GPIOB->ODR=0x00000000;  // desliga todos os pinos;
+	 GPIOB->ODR=0x00000000;  // desliga todos os LEDs;
 	 tempo();  // espera 0,5 s;
 	 GPIOB->ODR=0x0000F00E;  // liga o pino 1, 2, 3, 12, 13, 14 e 15;
  	 tempo();  // espera 0,5 s;
