@@ -1,24 +1,24 @@
 /*
-Este código visa reproduzir alguma música.
-NOTA: 					FREQUÊNCIA(Hz):
-Dó 						261,63
+Este cÃ³digo visa reproduzir alguma mÃºsica.
+NOTA: 					FREQUÃŠNCIA(Hz):
+DÃ³ 						261,63
 Re 						293,66
 Mi 						329,63
-Fá 						349,23
-Fá#                     369,99
-Sol 					392
+FÃ¡ 						349,23
+FÃ¡#                                             369,99
+Sol 					        392
 La 						440
 Si 						493,88
 */
 
 #include "main.h"
 
-// Função que contabiliza tempo.
+// FunÃ§Ã£o que contabiliza tempo.
 void tempo (void) {
-	while((TIM10->SR & 0x0001) == 0x0000) {  // verifica se o cronômetro foi "setado" (acabou a contagem);
-		// enquanto o cronômetro não for "setado para 1", a contagem irá continuar dentro desse while;
+	while((TIM10->SR & 0x0001) == 0x0000) {  // verifica se o cronÃ´metro foi "setado" (acabou a contagem);
+		// enquanto o cronÃ´metro nÃ£o for "setado para 1", a contagem irÃ¡ continuar dentro desse while;
 	}
-	TIM10->SR&=~(0x0001);  // "resetar" o cronômetro, botando zero no bit em questão;
+	TIM10->SR&=~(0x0001);  // "resetar" o cronÃ´metro, botando zero no bit em questÃ£o;
 }
 
 int main(void)
@@ -27,7 +27,7 @@ int main(void)
   RCC->APB2ENR|=0x20000;  // inicializa o clock do TIMER10;
   TIM10->CR1|=0x0005;  // habilita a contagem do TIMER10;
   TIM10->ARR=9;  // coloca 9 no ARR;
-  GPIOA->MODER=0x28000001;  // configura a função de Debugger com o ARM e o pino PA0 como saída;
+  GPIOA->MODER=0x28000001;  // configura a funÃ§Ã£o de Debugger com o ARM e o pino PA0 como saÃ­da;
 
   while (1)
   {
@@ -199,7 +199,7 @@ int main(void)
 	  	  tempo();
 	  	  GPIOA->ODR&=~(0x00000001);
 	  }
-	  // Nota "dó".
+	  // Nota "dÃ³".
 	  for(int i=0; i < 50; i++) {
 		  TIM10->PSC=3055;
 		  tempo();
@@ -215,7 +215,7 @@ int main(void)
 		  tempo();
 		  GPIOA->ODR&=~(0x00000001);
 	  }
-	  // Nota "dó".
+	  // Nota "dÃ³".
 	  for(int i=0; i < 50; i++) {
 		  TIM10->PSC=3055;
 		  tempo();
@@ -247,7 +247,7 @@ int main(void)
 	  	  tempo();
 	  	  GPIOA->ODR&=~(0x00000001);
 	  }
-	  // Nota "dó".
+	  // Nota "dÃ³".
 	  for(int i=0; i < 50; i++) {
 		  TIM10->PSC=3055;
 		  tempo();
@@ -262,7 +262,7 @@ int main(void)
 	  	  GPIOA->ODR|=0x00000001;
 		  tempo();
 		  GPIOA->ODR&=~(0x00000001);
-	  }// Nota "dó".
+	  }// Nota "dÃ³".
 	  for(int i=0; i < 50; i++) {
 		  TIM10->PSC=3055;
 		  tempo();
