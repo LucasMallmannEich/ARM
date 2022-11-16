@@ -1,7 +1,7 @@
 /*
- * Este cÛdigo visa simular um relÛgio digital (horas, minutos e segundos).
- * O programa fica repetindo a palavra "ACORDA" quando o hor·rio chega na hora definida.
- * O hor·rio N√O fica rodando, a partir do conceito de multiplexaÁ„o (MUX).
+ * Este c√≥digo visa simular um rel√≥gio digital (horas, minutos e segundos).
+ * O programa fica repetindo a palavra "ACORDA" quando o hor√°rio chega na hora definida.
+ * O hor√°rio N√ÉO fica rodando, a partir do conceito de multiplexa√ß√£o (MUX).
  * A palavra "ACORDA" fica piscando pelos displays durante alguns segundos.
  */
 
@@ -10,44 +10,83 @@
 // DISPLAY1 - H1, DISPLAY2 - H2, DISPLAY3 - M1, DISPLAY4 - M2, DISPLAY5 - S1, DISPLAY6 - S2
 int display1 = 0, display2 = 0, display3 = 0, display4 = 0, display5 = 0, display6 = 0;  // contagem dos 6 displays;
 int contador_display = 0;  // indica qual display estamos ligando;
-int numeros[] = {0x3F, 0x06, 0x5B, 0x4F, 0x66, 0x6D, 0x7D, 0x07, 0x7F, 0x6F};  // n˙meros de 0 ‡ 9;
+int numeros[] = {0x3F, 0x06, 0x5B, 0x4F, 0x66, 0x6D, 0x7D, 0x07, 0x7F, 0x6F};  // n√∫meros de 0 √† 9;
 int acorda[] = {0x77, 0x58, 0x5C, 0x50, 0x5E, 0x77, 0x00};  // letras "A", "C", "O", "R", "D", "A" e " ";
 int acordar = 0;
 int aux=0;
 int aux1 = 0;
+int ajusta_alarme = 0;
+int estado_atual1=0;
+int estado_atual2=0;
+int h1, h2, m1, m2;
 
 void TIM1_UP_TIM10_IRQHandler(){
-	// Se algum display passar do n˙mero 9 (Ìndice do vetor "numeros[]"), o display volta ‡ zero. Caso contr·rio, È acrescentado.
-	// Os displays tambÈm funcionam de acordo com as regras das horas, minutos e segundos.
+	// Se algum display passar do n√∫mero 9 (√≠ndice do vetor "numeros[]"), o display volta √† zero. Caso contr√°rio, √© acrescentado.
+	// Os displays tamb√©m funcionam de acordo com as regras das horas, minutos e segundos.
 
-	// Tocar o alarme quando for 00:01.
-	if(display1 == 0 && display2 == 0 && display3 == 0 && display4 == 1) {
-		acordar = 1;
-		if(aux == 60) {
-			display1 = 0;
-			display2 = 0;
-			display3 = 0;
-			display4 = 2;
-			aux = 0;
-			acordar = 0;
-		}
-		else{
-			if(aux1 == 0){
-				aux1 = 1;
+	if(ajusta_alarme < 10) {
+		// Ajuste dos minutos.
+		if(((GPIOA->IDR)&0x00000003) == 0x0001 && estado_atual1==0){
+			estado_atual1 = 1;
+			if(display4 == 9){
+				display4 = 0;
+				if(display3 == 5){
+					display3 = 0;
+					if(display2 == 9){
+						display2 = 0;
+						display1++;
+					}
+					else if(display2 == 3 && display1 == 2){
+						display2 = 0;
+						display1 = 0;
+					}
+					else{
+						display2++;
+					}
+				}
+				else{
+					display3++;
+				}
 			}
 			else{
-				aux1 = 0;
+				display4++;
 			}
-			aux++;
 		}
-	}
+		else if(((GPIOA->IDR)&0x00000003) == 0x0000 && estado_atual1==1){
+			estado_atual1 = 0;
+		}
 
-	else {
-		acordar = 0;
-		if(display6 == 9){
-			display6 = 0;
-			if(display5 == 5){
-				display5 = 0;
+		// Ajuste das horas.
+		if(((GPIOA->IDR)&0x00000003) == 0x0002 && estado_atual2 == 0){
+			estado_atual2 = 1;
+			if(display2 == 9){
+				display2 = 0;
+				display1++;
+			}
+			else if(display2 == 3 && display1 == 2){
+				display2 = 0;
+				display1 = 0;
+			}
+			else{
+				display2++;
+			}
+		}
+		else if(((GPIOA->IDR)&0x00000003) == 0x0000 && estado_atual2 == 1){
+			estado_atual2 = 0;
+		}
+
+		ajusta_alarme++;
+	}
+	else if(ajusta_alarme == 10){
+		h1 = display1, h2 = display2, m1 = display3, m2 = display4;
+		display1 = 0, display2 = 0, display3 = 0, display4 = 0, display5 = 0, display6 = 0;
+		ajusta_alarme++;
+	}
+	else{
+		// Tocar o alarme quando for 00:01.
+		if(display1 == h1 && display2 == h2 && display3 == m1 && display4 == m2) {
+			acordar = 1;
+			if(aux == 60) {
 				if(display4 == 9){
 					display4 = 0;
 					if(display3 == 5){
@@ -71,24 +110,129 @@ void TIM1_UP_TIM10_IRQHandler(){
 				else{
 					display4++;
 				}
+				aux = 0;
+				acordar = 0;
 			}
 			else{
-				display5++;
+				if(aux1 == 0){
+					aux1 = 1;
+				}
+				else{
+					aux1 = 0;
+				}
+				aux++;
 			}
 		}
+
 		else {
-			display6++;
+			acordar = 0;
+			if(display6 == 9){
+				display6 = 0;
+				if(display5 == 5){
+					display5 = 0;
+					if(display4 == 9){
+						display4 = 0;
+						if(display3 == 5){
+							display3 = 0;
+							if(display2 == 9){
+								display2 = 0;
+								display1++;
+							}
+							else if(display2 == 3 && display1 == 2){
+								display2 = 0;
+								display1 = 0;
+							}
+							else{
+								display2++;
+							}
+						}
+						else{
+							display3++;
+						}
+					}
+					else{
+						display4++;
+					}
+				}
+				else{
+					display5++;
+				}
+			}
+			else {
+				display6++;
+			}
 		}
 	}
-
 	TIM10->SR&=~(0x01);  // limpando flag do TIMER10;
 }
+
+int i=801;
 
 void TIM1_TRG_COM_TIM11_IRQHandler(){
 	GPIOC->ODR|=0x3F00;  // desligando todos os displays (colocando o segmento comum deles no VCC);
 	GPIOC->ODR&=~0xFF;  // limpando os oito bits (colocando zero nos segmentos dos displays);
 
-	// Verifica qual display "est· na sua vez" de ser acionado a partir do zero em seu segmento comum.
+	// Ajuste dos minutos.
+	if(((GPIOA->IDR)&0x00000003) == 0x0001 && i>800 && estado_atual1 == 0){
+		estado_atual1 = 1;
+		i = 0;
+		if(display4 == 9){
+			display4 = 0;
+			if(display3 == 5){
+				display3 = 0;
+				if(display2 == 9){
+					display2 = 0;
+					display1++;
+				}
+				else if(display2 == 3 && display1 == 2){
+					display2 = 0;
+					display1 = 0;
+				}
+				else{
+					display2++;
+				}
+			}
+			else{
+				display3++;
+			}
+		}
+		else{
+			display4++;
+		}
+	}
+	else if(((GPIOA->IDR)&0x00000003) == 0x0000 && i>800 && estado_atual1 == 1){
+		estado_atual1 = 0;
+		i++;
+	}
+	else {
+		i++;
+	}
+
+	// Ajuste das horas.
+	if(((GPIOA->IDR)&0x00000003) == 0x0002 && i>800 && estado_atual2 == 0){
+		estado_atual2 = 1;
+		i=0;
+		if(display2 == 9){
+			display2 = 0;
+			display1++;
+		}
+		else if(display2 == 3 && display1 == 2){
+			display2 = 0;
+			display1 = 0;
+		}
+		else{
+			display2++;
+		}
+	}
+	else if(((GPIOA->IDR)&0x00000003) == 0x0000 && i>800 && estado_atual2 == 1){
+		estado_atual2 = 0;
+		i++;
+	}
+	else {
+		i++;
+	}
+
+	// Verifica qual display "est√° na sua vez" de ser acionado a partir do zero em seu segmento comum.
 	switch(contador_display){
 		case 0:
 			if(acordar == 0) {
@@ -176,7 +320,7 @@ void TIM1_TRG_COM_TIM11_IRQHandler(){
 	    	break;
 	}
 
-	// Verifica se o contador do display ultrapassou o n˙mero 5 e acresenta-se de acordo com essa informaÁ„o.
+	// Verifica se o contador do display ultrapassou o n√∫mero 5 e acresenta-se de acordo com essa informa√ß√£o.
 	if(contador_display == 5) {
 		contador_display = 0;
 	}
@@ -194,8 +338,8 @@ void configuracao_timer_10(void) {
 	TIM10->PSC=3999;  // coloca 3999 no PSC;
 	TIM10->ARR=3999;  // coloca 3999 no ARR;
 
-	TIM10->DIER|=0x01;  // habilita interrupÁ„o do TIMER10;
-	// Habilita interrupÁ„o no controlador:
+	TIM10->DIER|=0x01;  // habilita interrup√ß√£o do TIMER10;
+	// Habilita interrup√ß√£o no controlador:
 	NVIC_SetPriority(TIM1_UP_TIM10_IRQn, 3);  // Priority = 3;
 	NVIC_EnableIRQ(TIM1_UP_TIM10_IRQn);
 }
@@ -207,8 +351,8 @@ void configuracao_timer_11(void) {
 	TIM11->PSC=799;  // coloca 799 no PSC;
 	TIM11->ARR=19;  // coloca 19 no ARR;
 
-	TIM11->DIER|=0x01;  // habilita interrupÁ„o do TIMER11;
-	// Habilita interrupÁ„o no controlador:
+	TIM11->DIER|=0x01;  // habilita interrup√ß√£o do TIMER11;
+	// Habilita interrup√ß√£o no controlador:
 	NVIC_SetPriority(TIM1_TRG_COM_TIM11_IRQn, 4);  // Priority = 4;
 	NVIC_EnableIRQ(TIM1_TRG_COM_TIM11_IRQn);
 }
@@ -216,8 +360,8 @@ void configuracao_timer_11(void) {
 int main(void)
 {
 	RCC->AHB1ENR=0x00000087;  // inicializa o clock;
-	GPIOA->MODER=0x28000000;  // configura a funÁ„o de Debugger com o ARM e os pinos PA0 e PA1 como entradas;
-	GPIOC->MODER=0X05555555;  // configura o pino PC0 ao pino PC13 como saÌdas;
+	GPIOA->MODER=0x28000000;  // configura a fun√ß√£o de Debugger com o ARM e os pinos PA0 e PA1 como entradas;
+	GPIOC->MODER=0X05555555;  // configura o pino PC0 ao pino PC13 como sa√≠das;
 	configuracao_timer_10();  // configura o TIMER 10;
 	configuracao_timer_11();  // configura o TIMER 11;
 	while (1)
