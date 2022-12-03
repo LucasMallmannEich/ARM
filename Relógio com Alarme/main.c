@@ -1,7 +1,7 @@
 /*
- * Este cÛdigo visa simular um relÛgio digital (horas, minutos e segundos).
- * O programa fica repetindo a palavra "ACORDA" quando o hor·rio chega na hora definida.
- * O hor·rio N√O fica rodando, a partir do conceito de multiplexaÁ„o (MUX).
+ * Este c√≥digo visa simular um rel√≥gio digital (horas, minutos e segundos).
+ * O programa fica repetindo a palavra "ACORDA" quando o hor√°rio chega na hora definida.
+ * O hor√°rio N√ÉO fica rodando, a partir do conceito de multiplexa√ß√£o (MUX).
  * A palavra "ACORDA" fica piscando pelos displays durante alguns segundos.
  */
 
@@ -10,22 +10,28 @@
 // DISPLAY1 - H1, DISPLAY2 - H2, DISPLAY3 - M1, DISPLAY4 - M2, DISPLAY5 - S1, DISPLAY6 - S2
 int display1 = 0, display2 = 0, display3 = 0, display4 = 0, display5 = 0, display6 = 0;  // contagem dos 6 displays;
 int contador_display = 0;  // indica qual display estamos ligando;
-int numeros[] = {0x3F, 0x06, 0x5B, 0x4F, 0x66, 0x6D, 0x7D, 0x07, 0x7F, 0x6F};  // n˙meros de 0 ‡ 9;
-int acorda[] = {0x77, 0x58, 0x5C, 0x50, 0x5E, 0x77, 0x00};  // letras "A", "C", "O", "R", "D", "A" e " ";
-int acordar = 0;
-int aux=0;
-int aux1 = 0;
-int ajusta_alarme = 0;
+int numeros[] = {0x3F, 0x06, 0x5B, 0x4F, 0x66, 0x6D, 0x7D, 0x07, 0x7F, 0x6F};  // n√∫meros de 0 √† 9;
 int estado_atual1=0;
 int estado_atual2=0;
-int h1, h2, m1, m2;
-int bip=0;
+int estado_botao = 0;
+int h1 = 0, h2 = 0, m1 = 0, m2 = 1;  // hor√°rio em que o alarme tocar√°;
+int ajuste = 0;  // 0 para ajustar o rel√≥gio e 1 para ajustar o alarme;
+int alarme_tocando = 0;  // se tiver 1, o alarme deve tocar;
+int alarme[] = {0x77, 0x58, 0x5C, 0x50, 0x5E, 0x77, 0x00};  // letras "A", "C", "O", "R", "D", "A" e " ";
+int aux_alarme_display = 0;
 
 void TIM1_UP_TIM10_IRQHandler(){
-	// Se algum display passar do n˙mero 9 (Ìndice do vetor "numeros[]"), o display volta ‡ zero. Caso contr·rio, È acrescentado.
-	// Os displays tambÈm funcionam de acordo com as regras das horas, minutos e segundos.
+	if(aux_alarme_display == 0){
+		aux_alarme_display = 1;
+	}
+	else{
+		aux_alarme_display = 0;
+	}
+	// Se algum display passar do n√∫mero 9 (√≠ndice do vetor "numeros[]"), o display volta √† zero. Caso contr√°rio, √© acrescentado.
+	// Os displays tamb√©m funcionam de acordo com as regras das horas, minutos e segundos.
 
-	if(ajusta_alarme < 10) {
+	// Ajuste do rel√≥gio.
+	if(ajuste == 0){
 		// Ajuste dos minutos.
 		if(((GPIOA->IDR)&0x00000003) == 0x0001 && estado_atual1==0){
 			estado_atual1 = 1;
@@ -75,115 +81,118 @@ void TIM1_UP_TIM10_IRQHandler(){
 		else if(((GPIOA->IDR)&0x00000003) == 0x0000 && estado_atual2 == 1){
 			estado_atual2 = 0;
 		}
+	}
 
-		ajusta_alarme++;
-	}
-	else if(ajusta_alarme == 10){
-		h1 = display1, h2 = display2, m1 = display3, m2 = display4;
-		display1 = 0, display2 = 0, display3 = 0, display4 = 0, display5 = 0, display6 = 0;
-		ajusta_alarme++;
-	}
-	else{
-		// Tocar o alarme quando for a hora ajustada.
-		if(display1 == h1 && display2 == h2 && display3 == m1 && display4 == m2) {
-			acordar = 1;
-			if(aux == 60) {
-				if(display4 == 9){
-					display4 = 0;
-					if(display3 == 5){
-						display3 = 0;
-						if(display2 == 9){
-							display2 = 0;
-							display1++;
-						}
-						else if(display2 == 3 && display1 == 2){
-							display2 = 0;
-							display1 = 0;
-						}
-						else{
-							display2++;
-						}
+	// Ajuste do alarme.
+	else if(ajuste == 1){
+		// Ajuste dos minutos.
+		if(((GPIOA->IDR)&0x00000003) == 0x0001 && estado_atual1==0){
+			estado_atual1 = 1;
+			if(m2 == 9){
+				m2 = 0;
+				if(m1 == 5){
+					m1 = 0;
+					if(h2 == 9){
+						h2 = 0;
+						h1++;
+					}
+					else if(h2 == 3 && h1 == 2){
+						h2 = 0;
+						h1 = 0;
 					}
 					else{
-						display3++;
+						h2++;
 					}
 				}
 				else{
-					display4++;
+					m1++;
 				}
-				aux = 0;
-				acordar = 0;
 			}
 			else{
-				if(aux1 == 0){
-					aux1 = 1;
-				}
-				else{
-					aux1 = 0;
-				}
-				aux++;
+				m2++;
 			}
+		}
+		else if(((GPIOA->IDR)&0x00000003) == 0x0000 && estado_atual1==1){
+			estado_atual1 = 0;
 		}
 
-		else {
-			acordar = 0;
-			if(display6 == 9){
-				display6 = 0;
-				if(display5 == 5){
-					display5 = 0;
-					if(display4 == 9){
-						display4 = 0;
-						if(display3 == 5){
-							display3 = 0;
-							if(display2 == 9){
-								display2 = 0;
-								display1++;
-							}
-							else if(display2 == 3 && display1 == 2){
-								display2 = 0;
-								display1 = 0;
-							}
-							else{
-								display2++;
-							}
-						}
-						else{
-							display3++;
-						}
+		// Ajuste das horas.
+		if(((GPIOA->IDR)&0x00000003) == 0x0002 && estado_atual2 == 0){
+			estado_atual2 = 1;
+			if(h2 == 9){
+				h2 = 0;
+				h1++;
+			}
+			else if(h2 == 3 && h1 == 2){
+				h2 = 0;
+				h1 = 0;
+			}
+			else{
+				h2++;
+			}
+		}
+		else if(((GPIOA->IDR)&0x00000003) == 0x0000 && estado_atual2 == 1){
+			estado_atual2 = 0;
+		}
+	}
+
+	if(display6 == 9){
+		display6 = 0;
+		if(display5 == 5){
+			display5 = 0;
+			if(m2 == 9){
+				m2 = 0;
+				if(m1 == 5){
+					m1 = 0;
+					if(h2 == 9){
+						h2 = 0;
+						h1++;
+					}
+					else if(h2 == 3 && h1 == 2){
+						h2 = 0;
+						h1 = 0;
 					}
 					else{
-						display4++;
+						display2++;
 					}
 				}
 				else{
-					display5++;
+					display3++;
 				}
 			}
-			else {
-				display6++;
+			else{
+				display4++;
 			}
 		}
+		else{
+			display5++;
+		}
 	}
+	else {
+		display6++;
+	}
+
 	TIM10->SR&=~(0x01);  // limpando flag do TIMER10;
 }
 
-int i=801;
-int aux_bip=0;
+int i = 801;
+int aux_bip = 0;
+int bip=0;
 
 void TIM1_TRG_COM_TIM11_IRQHandler(){
 	GPIOC->ODR|=0x3F00;  // desligando todos os displays (colocando o segmento comum deles no VCC);
 	GPIOC->ODR&=~0xFF;  // limpando os oito bits (colocando zero nos segmentos dos displays);
 
 	// BIP BIP BIP...
-	if(acordar==1 && aux_bip<1000) {
+	if(alarme_tocando==1 && aux_bip<1000) {
 		aux_bip++;
 		if(bip == 0){
 			bip=1;
-			GPIOA->ODR|=0x0010;
+			GPIOA->ODR|=0x0020;
 		}
 		else{
 			bip=0;
-			GPIOA->ODR&=~(0x0010);
+			GPIOA->ODR&=~(0x0020);
 		}
 	}
 	else{
@@ -193,155 +202,252 @@ void TIM1_TRG_COM_TIM11_IRQHandler(){
 		}
 	}
 
-	// Ajuste dos minutos.
-	if(((GPIOA->IDR)&0x00000003) == 0x0001 && i>800 && estado_atual1 == 0){
-		estado_atual1 = 1;
-		i = 0;
-		if(display4 == 9){
-			display4 = 0;
-			if(display3 == 5){
-				display3 = 0;
-				if(display2 == 9){
-					display2 = 0;
-					display1++;
-				}
-				else if(display2 == 3 && display1 == 2){
-					display2 = 0;
-					display1 = 0;
+	// Ajuste do rel√≥gio.
+	if(ajuste == 0){
+		// Ajuste dos minutos.
+		if(((GPIOA->IDR)&0x00000003) == 0x0001 && i>800 && estado_atual1 == 0){
+			estado_atual1 = 1;
+			i = 0;
+			if(display4 == 9){
+				display4 = 0;
+				if(display3 == 5){
+					display3 = 0;
+					if(display2 == 9){
+						display2 = 0;
+						display1++;
+					}
+					else if(display2 == 3 && display1 == 2){
+						display2 = 0;
+						display1 = 0;
+					}
+					else{
+						display2++;
+					}
 				}
 				else{
-					display2++;
+					display3++;
 				}
 			}
 			else{
-				display3++;
+				display4++;
 			}
 		}
-		else{
-			display4++;
+		else if(((GPIOA->IDR)&0x00000003) == 0x0000 && i>800 && estado_atual1 == 1){
+			estado_atual1 = 0;
+			i++;
 		}
-	}
-	else if(((GPIOA->IDR)&0x00000003) == 0x0000 && i>800 && estado_atual1 == 1){
-		estado_atual1 = 0;
-		i++;
-	}
-	else {
-		i++;
-	}
+		else {
+			i++;
+		}
 
-	// Ajuste das horas.
-	if(((GPIOA->IDR)&0x00000003) == 0x0002 && i>800 && estado_atual2 == 0){
-		estado_atual2 = 1;
-		i=0;
-		if(display2 == 9){
-			display2 = 0;
-			display1++;
-		}
-		else if(display2 == 3 && display1 == 2){
-			display2 = 0;
-			display1 = 0;
-		}
-		else{
-			display2++;
-		}
-	}
-	else if(((GPIOA->IDR)&0x00000003) == 0x0000 && i>800 && estado_atual2 == 1){
-		estado_atual2 = 0;
-		i++;
-	}
-	else {
-		i++;
-	}
-
-	// Verifica qual display "est· na sua vez" de ser acionado a partir do zero em seu segmento comum.
-	switch(contador_display){
-	case 0:
-			if(acordar == 0) {
-				GPIOC->ODR|=numeros[display1];
+		// Ajuste das horas.
+		if(((GPIOA->IDR)&0x00000003) == 0x0002 && i>800 && estado_atual2 == 0){
+			estado_atual2 = 1;
+			i=0;
+			if(display2 == 9){
+				display2 = 0;
+				display1++;
+			}
+			else if(display2 == 3 && display1 == 2){
+				display2 = 0;
+				display1 = 0;
 			}
 			else{
-				if(aux1 == 0){
-					GPIOC->ODR|=acorda[0];
-				}
-				else{
-					GPIOC->ODR|=acorda[6];
-				}
+				display2++;
 			}
-	        GPIOC->ODR&=~0x100;
-	        break;
-	    case 1:
-	    	if(acordar == 0) {
-	    		GPIOC->ODR|=numeros[display2];
-	    	}
-	    	else{
-	    		if(aux1 == 0){
-	    			GPIOC->ODR|=acorda[1];
-	    		}
-	    		else{
-	    			GPIOC->ODR|=acorda[6];
-	    		}
-	    	}
-	    	GPIOC->ODR&=~0x200;
-	        break;
-	    case 2:
-	    	if(acordar == 0) {
-	    		GPIOC->ODR|=numeros[display3];
-	        }
-	    	else{
-	    		if(aux1 == 0){
-	    			GPIOC->ODR|=acorda[2];
-	    		}
-	    		else{
-	    			GPIOC->ODR|=acorda[6];
-	    		}
-	       	}
-	        GPIOC->ODR&=~0x400;
-	        break;
-	    case 3:
-	    	if(acordar == 0) {
-	    		GPIOC->ODR|=numeros[display4];
-	    	}
-	    	else{
-	    		if(aux1 == 0) {
-	    			GPIOC->ODR|=acorda[3];
-	    		}
-	    		else{
-	    			GPIOC->ODR|=acorda[6];
-	    		}
-	    	}
-	        GPIOC->ODR&=~0x800;
-	        break;
-	    case 4:
-	    	if(acordar == 0) {
-	    		GPIOC->ODR|=numeros[display5];
-	    	}
-	    	else{
-	    		if(aux1 == 0){
-	    			GPIOC->ODR|=acorda[4];
-	    		}
-	    		else{
-	    			GPIOC->ODR|=acorda[6];
-	    		}
-	    	}
-	    	GPIOC->ODR&=~0x1000;
-	    	break;
-	    case 5:
-	    	if(acordar == 0) {
-	    		GPIOC->ODR|=numeros[display6];
-	    	}
-	    	else{
-	    		if(aux1 == 0){
-	    			GPIOC->ODR|=acorda[5];
-	    		}
-	    		else{
-	    			GPIOC->ODR|=acorda[6];
-	    		}
-	    	}
-	    	GPIOC->ODR&=~0x2000;
-	    	break;
+		}
+		else if(((GPIOA->IDR)&0x00000003) == 0x0000 && i>800 && estado_atual2 == 1){
+			estado_atual2 = 0;
+			i++;
+		}
+		else {
+			i++;
+		}
 	}
 
-	// Verifica se o contador do display ultrapassou o n˙mero 5 e acresenta-se de acordo com essa informaÁ„o.
+	// Ajuste do alarme.
+	else if(ajuste == 1){
+		// Ajuste dos minutos.
+		if(((GPIOA->IDR)&0x00000003) == 0x0001 && i>800 && estado_atual1 == 0){
+			estado_atual1 = 1;
+			i = 0;
+			if(m2 == 9){
+				m2 = 0;
+				if(m1 == 5){
+					m1 = 0;
+					if(h2 == 9){
+						h2 = 0;
+						h1++;
+					}
+					else if(h2 == 3 && h1 == 2){
+						h2 = 0;
+						h1 = 0;
+					}
+					else{
+						h2++;
+					}
+				}
+				else{
+					m1++;
+				}
+			}
+			else{
+				m2++;
+			}
+		}
+		else if(((GPIOA->IDR)&0x00000003) == 0x0000 && i>800 && estado_atual1 == 1){
+			estado_atual1 = 0;
+			i++;
+		}
+		else {
+			i++;
+		}
+
+		// Ajuste das horas.
+		if(((GPIOA->IDR)&0x00000003) == 0x0002 && i>800 && estado_atual2 == 0){
+			estado_atual2 = 1;
+			i=0;
+			if(h2 == 9){
+				h2 = 0;
+				h1++;
+			}
+			else if(h2 == 3 && h1 == 2){
+				h2 = 0;
+				h1 = 0;
+			}
+			else{
+				h2++;
+			}
+		}
+		else if(((GPIOA->IDR)&0x00000003) == 0x0000 && i>800 && estado_atual2 == 1){
+			estado_atual2 = 0;
+			i++;
+		}
+		else {
+			i++;
+		}
+	}
+
+	// Verifica qual display "est√° na sua vez" de ser acionado a partir do zero em seu segmento comum.
+	if(ajuste == 0){
+		switch(contador_display){
+			case 0:
+				if(alarme_tocando == 0){
+					GPIOC->ODR|=numeros[display1];
+				}
+				else{
+					if(aux_alarme_display == 0){
+						GPIOC->ODR|=alarme[0];
+					}
+					else{
+						GPIOC->ODR|=alarme[6];
+					}
+				}
+				GPIOC->ODR&=~0x100;
+				break;
+			case 1:
+				if(alarme_tocando == 0){
+					GPIOC->ODR|=numeros[display2];
+				}
+				else{
+					if(aux_alarme_display == 0){
+						GPIOC->ODR|=alarme[1];
+
+					}
+					else{
+						GPIOC->ODR|=alarme[6];
+					}
+				}
+				GPIOC->ODR&=~0x200;
+				break;
+			case 2:
+				if(alarme_tocando == 0){
+					GPIOC->ODR|=numeros[display3];
+				}
+				else{
+					if(aux_alarme_display == 0){
+						GPIOC->ODR|=alarme[2];
+					}
+					else{
+						GPIOC->ODR|=alarme[6];
+					}
+				}
+				GPIOC->ODR&=~0x400;
+				break;
+			case 3:
+				if(alarme_tocando == 0){
+					GPIOC->ODR|=numeros[display4];
+				}
+				else{
+					if(aux_alarme_display == 0){
+						GPIOC->ODR|=alarme[3];
+					}
+					else{
+						GPIOC->ODR|=alarme[6];
+					}
+				}
+				GPIOC->ODR&=~0x800;
+				break;
+			case 4:
+				if(alarme_tocando == 0){
+					GPIOC->ODR|=numeros[display5];
+				}
+				else{
+					if(aux_alarme_display == 0){
+						GPIOC->ODR|=alarme[4];
+					}
+					else{
+						GPIOC->ODR|=alarme[6];
+					}
+				}
+				GPIOC->ODR&=~0x1000;
+				break;
+			case 5:
+				if(alarme_tocando == 0){
+					GPIOC->ODR|=numeros[display6];
+				}
+				else{
+					if(aux_alarme_display == 0){
+						GPIOC->ODR|=alarme[5];
+					}
+					else{
+						GPIOC->ODR|=alarme[6];
+					}
+				}
+				GPIOC->ODR&=~0x2000;
+				break;
+		}
+	}
+	else if(ajuste == 1){
+		switch(contador_display){
+			case 0:
+				GPIOC->ODR|=numeros[h1];
+				GPIOC->ODR&=~0x100;
+				break;
+			case 1:
+				GPIOC->ODR|=numeros[h2];
+				GPIOC->ODR&=~0x200;
+				break;
+			case 2:
+				GPIOC->ODR|=numeros[m1];
+				GPIOC->ODR&=~0x400;
+				break;
+			case 3:
+				GPIOC->ODR|=numeros[m2];
+				GPIOC->ODR&=~0x800;
+				break;
+			case 4:
+				GPIOC->ODR|=numeros[0];
+				GPIOC->ODR&=~0x1000;
+				break;
+			case 5:
+				GPIOC->ODR|=numeros[0];
+				GPIOC->ODR&=~0x2000;
+				break;
+		}
+	}
+
+	// Verifica se o contador do display ultrapassou o n√∫mero 5 e acresenta-se de acordo com essa informa√ß√£o.
 	if(contador_display == 5) {
 		contador_display = 0;
 	}
@@ -359,8 +465,8 @@ void configuracao_timer_10(void) {
 	TIM10->PSC=3999;  // coloca 3999 no PSC;
 	TIM10->ARR=3999;  // coloca 3999 no ARR;
 
-	TIM10->DIER|=0x01;  // habilita interrupÁ„o do TIMER10;
-	// Habilita interrupÁ„o no controlador:
+	TIM10->DIER|=0x01;  // habilita interrup√ß√£o do TIMER10;
+	// Habilita interrup√ß√£o no controlador:
 	NVIC_SetPriority(TIM1_UP_TIM10_IRQn, 3);  // Priority = 3;
 	NVIC_EnableIRQ(TIM1_UP_TIM10_IRQn);
 }
@@ -372,8 +478,8 @@ void configuracao_timer_11(void) {
 	TIM11->PSC=799;  // coloca 799 no PSC;
 	TIM11->ARR=19;  // coloca 19 no ARR;
 
-	TIM11->DIER|=0x01;  // habilita interrupÁ„o do TIMER11;
-	// Habilita interrupÁ„o no controlador:
+	TIM11->DIER|=0x01;  // habilita interrup√ß√£o do TIMER11;
+	// Habilita interrup√ß√£o no controlador:
 	NVIC_SetPriority(TIM1_TRG_COM_TIM11_IRQn, 4);  // Priority = 4;
 	NVIC_EnableIRQ(TIM1_TRG_COM_TIM11_IRQn);
 }
@@ -381,12 +487,34 @@ void configuracao_timer_11(void) {
 int main(void)
 {
 	RCC->AHB1ENR=0x00000087;  // inicializa o clock;
-	GPIOA->MODER=0x28000100;  // configura a funÁ„o de Debugger com o ARM e os pinos PA0 e PA1 como entradas e PA4 como saÌda;
-	GPIOC->MODER=0X05555555;  // configura o pino PC0 ao pino PC13 como saÌdas;
+	GPIOA->MODER=0x28001400;  // configura a fun√ß√£o de Debugger com o ARM e os pinos PA0, PA1 e PA4 (bot√µes) como entradas, com o PA5 e PA6 como sa√≠das (alarme e LED);
+	GPIOC->MODER=0X05555555;  // configura o pino PC0 ao pino PC13 como sa√≠das;
 	configuracao_timer_10();  // configura o TIMER 10;
 	configuracao_timer_11();  // configura o TIMER 11;
 	while (1)
 	{
+		if(((GPIOA->IDR)&0x00000010) == 0x0010 && estado_botao == 0){
+			for(int i=0; i<160; i++){
 
+			}
+			ajuste = 1;
+			estado_botao = 1;
+			GPIOA->ODR&=~(0x00000040);  // LED desliga indicando que o rel√≥gio est√° sendo configurado;
+		}
+		else if(((GPIOA->IDR)&0x00000010) == 0x0000 && estado_botao == 1){
+			for(int i=0; i<160; i++){
+
+			}
+			ajuste = 0;
+			estado_botao = 0;
+			GPIOA->ODR|=0x00000040;  // LED liga indicando que o alarme est√° sendo configurado;
+		}
+		// Verifica se o alarme deve tocar.
+		if(display1 == h1 && display2 == h2 && display3 == m1 && display4 == m2){
+			alarme_tocando = 1;
+		}
+		else{
+			alarme_tocando = 0;
+		}
 	}
 }
