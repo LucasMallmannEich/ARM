@@ -1,19 +1,19 @@
 /*
- * Fazer um contador crescente/descrescente hexadecimal com dois dÌgitos.
- * Conta o n˙mero de vezes que foi pressionado dois botıes.
+ * Fazer um contador crescente/descrescente hexadecimal com dois d√≠gitos.
+ * Conta o n√∫mero de vezes que foi pressionado dois bot√µes.
  */
 
 #include "main.h"
 
 int display1 = 0, display2 = 0;  // contagem dos 2 displays;
 int contador_display = 0;  // indica qual display estamos ligando;
-int hexadecimal[] = {0x3F, 0x06, 0x5B, 0x4F, 0x66, 0x6D, 0x7D, 0x07, 0x7F, 0x6F, 0x77, 0x7C, 0x39, 0x5E, 0x79, 0x71};  // n˙meros de 0 ‡ 9 + A ao F;
+int hexadecimal[] = {0x3F, 0x06, 0x5B, 0x4F, 0x66, 0x6D, 0x7D, 0x07, 0x7F, 0x6F, 0x77, 0x7C, 0x39, 0x5E, 0x79, 0x71};  // n√∫meros de 0 √† 9 + A ao F;
 int estado_atual1=0;
 int estado_atual2=0;
 
 void TIM1_UP_TIM10_IRQHandler(){
-	// Se algum display passar do n˙mero 9 (Ìndice do vetor "numeros[]"), o display volta ‡ zero. Caso contr·rio, È acrescentado.
-	// Os displays tambÈm funcionam de acordo com as regras das horas, minutos e segundos.
+	// Se algum display passar do n√∫mero 9 (√≠ndice do vetor "numeros[]"), o display volta √† zero. Caso contr√°rio, √© acrescentado.
+	// Os displays tamb√©m funcionam de acordo com as regras das horas, minutos e segundos.
 
 	TIM10->SR&=~(0x01);  // limpando flag do TIMER10;
 }
@@ -24,7 +24,7 @@ void TIM1_TRG_COM_TIM11_IRQHandler(){
 	GPIOC->ODR|=0x3F00;  // desligando todos os displays (colocando o segmento comum deles no VCC);
 	GPIOC->ODR&=~0xFF;  // limpando os oito bits (colocando zero nos segmentos dos displays);
 
-	// Ajuste do display1 (bot„o contador).
+	// Ajuste do display1 (bot√£o contador).
 	if(((GPIOA->IDR)&0x00000003) == 0x0001 && i>800 && estado_atual1 == 0){
 		estado_atual1 = 1;
 		i = 0;
@@ -49,7 +49,7 @@ void TIM1_TRG_COM_TIM11_IRQHandler(){
 		i++;
 	}
 
-	// Ajuste do display2 (bot„o que decrementa).
+	// Ajuste do display2 (bot√£o que decrementa).
 	if(((GPIOA->IDR)&0x00000003) == 0x0002 && i>800 && estado_atual2 == 0){
 		estado_atual2 = 1;
 		i=0;
@@ -74,7 +74,7 @@ void TIM1_TRG_COM_TIM11_IRQHandler(){
 		i++;
 	}
 
-	// Verifica qual display "est· na sua vez" de ser acionado a partir do zero em seu segmento comum.
+	// Verifica qual display "est√° na sua vez" de ser acionado a partir do zero em seu segmento comum.
 	switch(contador_display){
 		case 0:
 	        GPIOC->ODR|=hexadecimal[display1];
@@ -86,7 +86,7 @@ void TIM1_TRG_COM_TIM11_IRQHandler(){
 	        break;
 	}
 
-	// Verifica se o contador do display ultrapassou o n˙mero 5 e acresenta-se de acordo com essa informaÁ„o.
+	// Verifica se o contador do display ultrapassou o n√∫mero 1 e acresenta-se de acordo com essa informa√ß√£o.
 	if(contador_display == 1) {
 		contador_display = 0;
 	}
@@ -104,8 +104,8 @@ void configuracao_timer_10(void) {
 	TIM10->PSC=3999;  // coloca 3999 no PSC;
 	TIM10->ARR=3999;  // coloca 3999 no ARR;
 
-	TIM10->DIER|=0x01;  // habilita interrupÁ„o do TIMER10;
-	// Habilita interrupÁ„o no controlador:
+	TIM10->DIER|=0x01;  // habilita interrup√ß√£o do TIMER10;
+	// Habilita interrup√ß√£o no controlador:
 	NVIC_SetPriority(TIM1_UP_TIM10_IRQn, 3);  // Priority = 3;
 	NVIC_EnableIRQ(TIM1_UP_TIM10_IRQn);
 }
@@ -117,8 +117,8 @@ void configuracao_timer_11(void) {
 	TIM11->PSC=799;  // coloca 799 no PSC;
 	TIM11->ARR=19;  // coloca 19 no ARR;
 
-	TIM11->DIER|=0x01;  // habilita interrupÁ„o do TIMER11;
-	// Habilita interrupÁ„o no controlador:
+	TIM11->DIER|=0x01;  // habilita interrup√ß√£o do TIMER11;
+	// Habilita interrup√ß√£o no controlador:
 	NVIC_SetPriority(TIM1_TRG_COM_TIM11_IRQn, 4);  // Priority = 4;
 	NVIC_EnableIRQ(TIM1_TRG_COM_TIM11_IRQn);
 }
@@ -126,8 +126,8 @@ void configuracao_timer_11(void) {
 int main(void)
 {
 	RCC->AHB1ENR=0x00000087;  // inicializa o clock;
-	GPIOA->MODER=0x28000000;  // configura a funÁ„o de Debugger com o ARM e os pinos PA0 e PA1 como entradas;
-	GPIOC->MODER=0X05555555;  // configura o pino PC0 ao pino PC13 como saÌdas;
+	GPIOA->MODER=0x28000000;  // configura a fun√ß√£o de Debugger com o ARM e os pinos PA0 e PA1 como entradas;
+	GPIOC->MODER=0X05555555;  // configura o pino PC0 ao pino PC13 como sa√≠das;
 	configuracao_timer_10();  // configura o TIMER 10;
 	configuracao_timer_11();  // configura o TIMER 11;
 	while (1)
