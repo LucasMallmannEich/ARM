@@ -5,7 +5,7 @@ Proposta:
 
 -------------------------------------------------------------------------------------------------------------------
 
-To Light Up a LED when Pushing a Button in ARM
+To Light Up a LED when Pressing a Button in ARM
 
-Proposal:
-  The code must to light up an ARM's LED (pin PA5) if the button (connecter to pin PC13) is being pushed.
+Proposal:        
+  The code must to light up an ARM's LED (pin PA5) if the button (connecter to pin PC13) is being pressed.
